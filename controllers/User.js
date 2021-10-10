@@ -1,5 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcrypt");
+const jwt = require('jsonwebtoken');
+const dotenv = require("dotenv").config();
 
 exports.userRegister = async (req,res) => {
     try{
@@ -13,28 +15,45 @@ exports.userRegister = async (req,res) => {
             password:hashedPassword
       })
       //savig user
-      const user = await newUser.save();
-      res.status(200).json(user);
+      await newUser.save();
+      const token = jwt.sign({ email: newUser.email, id: newUser._id }, process.env.JWT_KEY, { expiresIn: "100h" });
+
+      res.status(200).json({ result: newUser, token });
     }catch(err){
-        res.status(500).json(err)
-        console.log(err)
+     
+        console.log(err);
+        return res.status(500).json(err);
     }
 }
 //Login 
 exports.userSignIn = async (req,res) => {
    try{
-       const existingUser = await User.findOne({username: req.body.username});
+       const existingUser = await User.findOne({email: req.body.email});
        if(!existingUser){
-           res.status(400).json("Invalid Credentials")
+           res.status(400).json("Invalid Credentials");
+           return;
        }else{
            const validPassword = await bcrypt.compare(req.body.password, existingUser.password)
            if(!validPassword){
-            res.status(400).json("Invalid Credentials")
+            res.status(400).json("Invalid Credentials");
+            return;
            }
-           res.status(200).json(existingUser)
+           const token = await jwt.sign({ email: existingUser.email, id: existingUser._id }, process.env.JWT_KEY);
+           res.cookie('t', token ,{ expire : new Date() + 9999});
+          return res.status(200).json({token, 
+            _id:existingUser._id,
+            username:existingUser.username,
+            admin:existingUser.admin,
+            email: existingUser.email });
        }
-
    }catch(err){
-       res.status(500).json(err)
+    console.log(err)
+      return res.status(500).json(err);
+  
    }
+}
+
+exports.signout = (req, res) => {
+  res.clearCookie('t');
+  res.json({message: "Signed out successfully"})
 }

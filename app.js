@@ -4,6 +4,8 @@ const dotenv = require("dotenv");
 const pinRouter = require("./routes/pin")
 const userRouter = require("./routes/user")
 const travelPlaceRouter = require("./routes/touristPlaces")
+const favPlaceRouter = require("./routes/favPlaces")
+const googleRouter = require("./routes/googleAPI")
 dotenv.config()
 const cors=require("cors");
 const corsOptions ={
@@ -11,7 +13,6 @@ const corsOptions ={
    credentials:true,            //access-control-allow-credentials:true
    optionSuccessStatus:200,
 }
-
 
 
 const app = express();
@@ -23,6 +24,8 @@ const port = 7000 || process.env.PORT;
 app.use("/pins",pinRouter);
 app.use("/user",userRouter);
 app.use("/tourists/guide", travelPlaceRouter)
+app.use("/favorite", favPlaceRouter)
+app.use("/google", googleRouter)
 
 //image upload
 

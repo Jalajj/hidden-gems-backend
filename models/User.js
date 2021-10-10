@@ -6,7 +6,6 @@ const userSchema  = new mongoose.Schema({
         required:true,
         min:3,
         max:20,
-        unique:true
     },
     email:{
         type:String,
@@ -19,11 +18,12 @@ const userSchema  = new mongoose.Schema({
         required:true,
         min:6
     },
+    photo: String,
     admin:{
         type:Boolean,
         default:false
     }
-    
 }, {timestamps:true});
+
 
 module.exports = mongoose.model("User", userSchema);
